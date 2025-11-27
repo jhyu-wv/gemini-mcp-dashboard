@@ -1,35 +1,33 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <v-card>
-      <v-card-title>
-        POPULATOR 데이터 그리드
-        <v-spacer></v-spacer>
-        <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="검색"
-          single-line
-          hide-details
-        ></v-text-field>
-      </v-card-title>
-      <v-data-table
-        :headers="headers"
-        :items="data"
-        :search="search"
-        :loading="loading"
-        loading-text="데이터 로딩 중..."
-        no-data-text="데이터가 없습니다."
-        class="elevation-1"
-      >
-        <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)">
-            mdi-pencil
-          </v-icon>
-          <v-icon small @click="deleteItem(item)">
-            mdi-delete
-          </v-icon>
-        </template>
-      </v-data-table>
+      <v-card-title>데이터 그리드</v-card-title>
+      <v-card-subtitle>현재 대시보드에 포함된 차트의 원본 데이터입니다.</v-card-subtitle>
+      <v-card-text>
+        <div v-if="isLoading" class="text-center pa-8">
+          <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
+          <p class="mt-4 text-subtitle-1">데이터를 불러오는 중입니다...</p>
+        </div>
+        <v-expansion-panels v-else-if="chartData.length > 0" variant="accordion">
+          <v-expansion-panel
+            v-for="chart in chartData"
+            :key="chart.chartId"
+          >
+            <v-expansion-panel-title>{{ chart.initialPrompt }}</v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <v-data-table
+                :headers="chart.tableData.headers.map(h => ({ title: h, key: h }))"
+                :items="chart.tableData.items"
+                class="elevation-1"
+                density="compact"
+              ></v-data-table>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+        <div v-else class="text-center pa-8">
+          <p>표시할 데이터가 없습니다. 대시보드에 차트를 추가해주세요.</p>
+        </div>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
@@ -38,50 +36,50 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-const search = ref('');
-const data = ref([]);
-const loading = ref(true);
-const headers = ref([]);
+const isLoading = ref(false);
+const chartData = ref([]);
 
-const loadData = async () => {
-  loading.value = true;
+const loadAllChartData = async () => {
+  isLoading.value = true;
   try {
-    const response = await axios.get('/api/data/populator');
-    data.value = response.data;
-    if (response.data.length > 0) {
-      // 동적으로 헤더 생성
-      headers.value = Object.keys(response.data[0]).map(key => ({
-        title: key,
-        align: 'start',
-        sortable: true,
-        key: key,
-      }));
-      // 액션 컬럼 추가 (필요하다면)
-      // headers.value.push({ title: 'Actions', key: 'actions', sortable: false });
+    // 1. Load dashboard layout
+    const layoutResponse = await axios.get('/api/dashboards/1');
+    const layout = layoutResponse.data.layout || [];
+
+    if (layout.length === 0) {
+      isLoading.value = false;
+      return;
     }
+
+    // 2. For each chart in layout, fetch its table data
+    const dataPromises = layout.map(item => {
+      return axios.post('/api/chart', { prompt: item.initialPrompt })
+        .then(response => ({
+          chartId: item.i,
+          initialPrompt: item.initialPrompt,
+          tableData: response.data.tableData,
+        }))
+        .catch(error => {
+          console.error(`Failed to load data for chart: ${item.initialPrompt}`, error);
+          return {
+            chartId: item.i,
+            initialPrompt: item.initialPrompt,
+            tableData: { headers: [], items: [] }, // Return empty data on error
+          };
+        });
+    });
+
+    chartData.value = await Promise.all(dataPromises);
+
   } catch (error) {
-    console.error("POPULATOR 데이터 로딩 실패:", error);
-    alert("데이터를 불러오는 데 실패했습니다.");
+    console.error("Failed to load dashboard layout:", error);
+    alert("대시보드 레이아웃을 불러오는 데 실패했습니다.");
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 };
 
-const editItem = (item) => {
-  alert(`Edit item: ${JSON.stringify(item)}`);
-  // 실제 편집 로직 구현
-};
-
-const deleteItem = (item) => {
-  alert(`Delete item: ${JSON.stringify(item)}`);
-  // 실제 삭제 로직 구현
-};
-
 onMounted(() => {
-  loadData();
+  loadAllChartData();
 });
 </script>
-
-<style scoped>
-/* 필요한 스타일 추가 */
-</style>

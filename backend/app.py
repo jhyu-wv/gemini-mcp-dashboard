@@ -208,6 +208,11 @@ def generate_chart():
 
     categories = []
     series = []
+    table_data = { "headers": [], "items": [] }
+
+    if rows:
+        table_data["headers"] = list(rows[0].keys())
+        table_data["items"] = [dict(row) for row in rows]
 
     if chart_type in ['pie', 'donut']:
         labels = [row[x_axis_col] for row in rows]
@@ -255,7 +260,8 @@ def generate_chart():
 
     response_data = {
         "chartOptions": chart_options,
-        "series": series
+        "series": series,
+        "tableData": table_data
     }
     return jsonify(response_data)
 
