@@ -17,27 +17,28 @@
 - **Database**: SQLite
 
 ## 📂 프로젝트 구조
-
-/
-├── backend/
-│   ├── app.py          # Flask API 서버
-│   └── database.db     # SQLite 데이터베이스 파일
-│
-├── frontend-v3/
-│   ├── src/
-│   │   ├── views/
-│   │   │   ├── Dashboard.vue
-│   │   │   ├── Report.vue
-│   │   │   └── DataGrid.vue
-│   │   ├── main.js
-│   │   └── App.vue
-│   └── ...
-│
-├── docs/
-│   ├── API.md          # API 명세서
-│   └── DATABASE.md     # 데이터베이스 스키마 정보
-│
-└── database.py         # DB 테이블 생성 및 초기화 스크립트
+  ```
+  /
+  ├── backend/
+  │   ├── app.py          # Flask API 서버
+  │   └── database.db     # SQLite 데이터베이스 파일
+  │
+  ├── frontend-v3/
+  │   ├── src/
+  │   │   ├── views/
+  │   │   │   ├── Dashboard.vue
+  │   │   │   ├── Report.vue
+  │   │   │   └── DataGrid.vue
+  │   │   ├── main.js
+  │   │   └── App.vue
+  │   └── ...
+  │
+  ├── docs/
+  │   ├── API.md          # API 명세서
+  │   └── DATABASE.md     # 데이터베이스 스키마 정보
+  │
+  └── database.py         # DB 테이블 생성 및 초기화 스크립트
+  ```
 
 ## 🚀 설치 및 실행
 
@@ -46,8 +47,14 @@
 **1. 환경 변수 설정**
 
 Google Gemini API 키를 환경 변수로 설정합니다.
-`export GOOGLE_API_KEY="YOUR_API_KEY"` (macOS/Linux)
-`set GOOGLE_API_KEY="YOUR_API_KEY"` (Windows)
+- macOS/Linux
+  ```
+  export GOOGLE_API_KEY="YOUR_API_KEY"
+  ```
+- Windows
+  ```
+  set GOOGLE_API_KEY="YOUR_API_KEY"
+  ```
 
 **2. 백엔드 설정**
 ```bash
@@ -90,5 +97,6 @@ npm install
 - `일별 검출 유형을 막대 차트로 그려줘`
 - `개인정보 접근 사용자 유형을 원 차트로 만들어줘`
 
-차트를 추가한 후, 상단의 **데이터 그리드** 탭을 클릭하여 각 차트의 원본 데이터를 테이블 형태로 확인해 보세요.
-또한, **보고서 생성** 버튼을 클릭하여 AI가 분석한 보고서를 확인할 수 있습니다.
+차트를 추가한 후, 상단의 **보고서 생성** 버튼을 클릭하여 AI가 분석한 보고서를 확인할 수 있습니다.
+또한, **데이터 그리드** 탭을 클릭하여 각 차트의 원본 데이터를 테이블 형태로 확인해 보세요.
+
